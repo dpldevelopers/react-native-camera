@@ -1,6 +1,6 @@
 package org.reactnative.camera;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -43,7 +43,7 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
 
   @Override
   public void onDropViewInstance(RNCameraView view) {
-    view.stop();
+    view.onHostDestroy();
     super.onDropViewInstance(view);
   }
 
@@ -73,6 +73,11 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
     view.setFacing(type);
   }
 
+  @ReactProp(name = "cameraId")
+  public void setCameraId(RNCameraView view, String id) {
+    view.setCameraId(id);
+  }
+
   @ReactProp(name = "ratio")
   public void setRatio(RNCameraView view, String ratio) {
     view.setAspectRatio(AspectRatio.parse(ratio));
@@ -84,7 +89,7 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   }
 
   @ReactProp(name = "exposure")
-  public void setExposureCompensation(RNCameraView view, int exposure){
+  public void setExposureCompensation(RNCameraView view, float exposure){
     view.setExposureCompensation(exposure);
   }
 
@@ -100,9 +105,11 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
 
   @ReactProp(name = "autoFocusPointOfInterest")
   public void setAutoFocusPointOfInterest(RNCameraView view, ReadableMap coordinates) {
-    float x = (float) coordinates.getDouble("x");
-    float y = (float) coordinates.getDouble("y");
-    view.setAutoFocusPointOfInterest(x, y);
+    if(coordinates != null){
+      float x = (float) coordinates.getDouble("x");
+      float y = (float) coordinates.getDouble("y");
+      view.setAutoFocusPointOfInterest(x, y);
+    }
   }
 
   @ReactProp(name = "zoom")
@@ -151,6 +158,7 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
     view.setCropScanAreaPercentageWidth(cropScanAreaSize.getDouble(0));
     view.setCropScanAreaPercentageHeight(cropScanAreaSize.getDouble(1));
   }
+
 
   @ReactProp(name = "useCamera2Api")
   public void setUseCamera2Api(RNCameraView view, boolean useCamera2Api) {

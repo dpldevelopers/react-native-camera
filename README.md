@@ -1,5 +1,14 @@
 # React Native Camera [![Backers on Open Collective](https://opencollective.com/react-native-camera/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/react-native-camera/sponsors/badge.svg)](#sponsors) [![npm version](https://badge.fury.io/js/react-native-camera.svg)](http://badge.fury.io/js/react-native-camera) [![npm downloads](https://img.shields.io/npm/dm/react-native-camera.svg)](https://www.npmjs.com/package/react-native-camera)
 
+
+## CROP, thats what you came for
+
+pass these props to <RNCamera>
+
+            cropScanAreaSize={[0.50, 0.30]}
+            cropScanAreaEnabled={true}
+
+
 ## Docs
 Follow our docs here [https://react-native-community.github.io/react-native-camera/](https://react-native-community.github.io/react-native-camera/)
 
@@ -135,11 +144,3 @@ To enable `video recording` feature you have to add the following code to the `A
 For more information on installation, please refer to [installation requirements](./docs/installation.md#requirements).
 
 For general introduction, please take a look into this [RNCamera](./docs/RNCamera.md).
-
-## Security contact information
-
-To report a security vulnerability, please use the
-
-[Tidelift security contact](https://tidelift.com/security).
-
-Tidelift will coordinate the fix and disclosure.
