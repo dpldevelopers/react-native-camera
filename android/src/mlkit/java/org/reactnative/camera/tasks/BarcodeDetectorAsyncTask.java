@@ -25,6 +25,10 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
   private byte[] mImageData;
   private int mWidth;
   private int mHeight;
+  private int mCropWidth;
+  private int mCropHeight;
+  private int mCropX;
+  private int mCropY;
   private int mRotation;
   private RNBarcodeDetector mBarcodeDetector;
   private BarcodeDetectorAsyncTaskDelegate mDelegate;
@@ -47,17 +51,25 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
       int viewWidth,
       int viewHeight,
       int viewPaddingLeft,
-      int viewPaddingTop
+      int viewPaddingTop,
+      int cropWidth,
+      int cropHeight,
+      int cropX,
+      int cropY
   ) {
     mImageData = imageData;
     mWidth = width;
     mHeight = height;
+    mCropWidth = cropWidth;
+    mCropHeight = cropHeight;
+    mCropX = cropX;
+    mCropY = cropY;
     mRotation = rotation;
     mDelegate = delegate;
     mBarcodeDetector = barcodeDetector;
     mImageDimensions = new ImageDimensions(width, height, rotation, facing);
     mScaleX = (double) (viewWidth) / (mImageDimensions.getWidth() * density);
-    mScaleY = 1 / density;
+    mScaleY = (double) (viewHeight) / (mImageDimensions.getHeight() * density);
     mPaddingLeft = viewPaddingLeft;
     mPaddingTop = viewPaddingTop;
   }
@@ -69,8 +81,8 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
     }
 
     final FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
-            .setWidth(mWidth)
-            .setHeight(mHeight)
+            .setWidth(mCropWidth)
+            .setHeight(mCropHeight)
             .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_YV12)
             .setRotation(getFirebaseRotation())
             .build();
@@ -130,7 +142,6 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
       String rawValue = barcode.getRawValue();
 
       int valueType = barcode.getValueType();
-      int valueFormat = barcode.getFormat();
 
       WritableMap serializedBarcode = Arguments.createMap();
 
@@ -279,7 +290,6 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
       serializedBarcode.putString("data", barcode.getDisplayValue());
       serializedBarcode.putString("dataRaw", rawValue);
       serializedBarcode.putString("type", BarcodeFormatUtils.get(valueType));
-      serializedBarcode.putString("format", BarcodeFormatUtils.getFormat(valueFormat));
       serializedBarcode.putMap("bounds", processBounds(bounds));
       barcodesList.pushMap(serializedBarcode);
     }
@@ -326,9 +336,17 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
   }
 
   private WritableMap processBounds(Rect frame) {
+    int cropX = mCropX;
+    int cropY = mCropY;
+    // Crop x/y are relative to landscape mode, we have to invert them for portrait mode
+    if(mRotation == 90 || mRotation == -90) {
+      cropX = mCropY;
+      cropY = mCropX;
+    }
+
     WritableMap origin = Arguments.createMap();
-    int x = frame.left;
-    int y = frame.top;
+    int x = frame.left + cropX;
+    int y = frame.top + cropY;
 
     if (frame.left < mWidth / 2) {
       x = x + mPaddingLeft / 2;
@@ -336,7 +354,11 @@ public class BarcodeDetectorAsyncTask extends android.os.AsyncTask<Void, Void, V
       x = x - mPaddingLeft / 2;
     }
 
-    y = y + mPaddingTop;
+    if (frame.top < mHeight / 2) {
+      y = y + mPaddingTop / 2;
+    } else if (frame.top > mHeight / 2) {
+      y = y - mPaddingTop / 2;
+    }
 
     origin.putDouble("x", x * mScaleX);
     origin.putDouble("y", y * mScaleY);

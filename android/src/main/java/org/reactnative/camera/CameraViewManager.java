@@ -1,6 +1,6 @@
 package org.reactnative.camera;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -43,7 +43,7 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
 
   @Override
   public void onDropViewInstance(RNCameraView view) {
-    view.onHostDestroy();
+    view.stop();
     super.onDropViewInstance(view);
   }
 
@@ -73,11 +73,6 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
     view.setFacing(type);
   }
 
-  @ReactProp(name = "cameraId")
-  public void setCameraId(RNCameraView view, String id) {
-    view.setCameraId(id);
-  }
-
   @ReactProp(name = "ratio")
   public void setRatio(RNCameraView view, String ratio) {
     view.setAspectRatio(AspectRatio.parse(ratio));
@@ -89,7 +84,7 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   }
 
   @ReactProp(name = "exposure")
-  public void setExposureCompensation(RNCameraView view, float exposure){
+  public void setExposureCompensation(RNCameraView view, int exposure){
     view.setExposureCompensation(exposure);
   }
 
@@ -105,11 +100,9 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
 
   @ReactProp(name = "autoFocusPointOfInterest")
   public void setAutoFocusPointOfInterest(RNCameraView view, ReadableMap coordinates) {
-    if(coordinates != null){
-      float x = (float) coordinates.getDouble("x");
-      float y = (float) coordinates.getDouble("y");
-      view.setAutoFocusPointOfInterest(x, y);
-    }
+    float x = (float) coordinates.getDouble("x");
+    float y = (float) coordinates.getDouble("y");
+    view.setAutoFocusPointOfInterest(x, y);
   }
 
   @ReactProp(name = "zoom")
@@ -142,6 +135,21 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   @ReactProp(name = "barCodeScannerEnabled")
   public void setBarCodeScanning(RNCameraView view, boolean barCodeScannerEnabled) {
     view.setShouldScanBarCodes(barCodeScannerEnabled);
+  }
+
+  @ReactProp(name = "cropScanAreaEnabled")
+  public void setCropScanAreaEnabled(RNCameraView view, boolean cropScanAreaEnabled) {
+    view.setShouldCropScanArea(cropScanAreaEnabled);
+  }
+
+  @ReactProp(name = "cropScanAreaSize")
+  public void setCropScanAreaSize(RNCameraView view, ReadableArray cropScanAreaSize) {
+    if (cropScanAreaSize == null || cropScanAreaSize.size() != 2) {
+      return;
+    }
+
+    view.setCropScanAreaPercentageWidth(cropScanAreaSize.getDouble(0));
+    view.setCropScanAreaPercentageHeight(cropScanAreaSize.getDouble(1));
   }
 
   @ReactProp(name = "useCamera2Api")
